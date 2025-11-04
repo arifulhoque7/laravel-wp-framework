@@ -1,6 +1,8 @@
 # Laravel WP Framework
 
-A professional, Laravel-inspired WordPress plugin architecture with separated admin and frontend React applications, modern PHP 8.3+ practices, and clean MVC structure.
+A professional, Laravel-inspired WordPress plugin architecture with **Eloquent ORM**, separated admin and frontend React applications, modern PHP 8.3+ practices, and clean MVC structure.
+
+**🎉 Now with full Laravel Eloquent ORM support!** No more `$wpdb` - use familiar Laravel database patterns in WordPress.
 
 ![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-777BB4.svg)
@@ -15,6 +17,11 @@ A professional, Laravel-inspired WordPress plugin architecture with separated ad
 cd wp-content/plugins
 git clone https://github.com/arifulhoque7/laravel-wp-framework.git
 cd laravel-wp-framework
+
+# Install Composer dependencies (Eloquent ORM)
+composer install
+
+# Install Node dependencies and build React apps
 npm install
 npm run build
 ```
@@ -23,29 +30,74 @@ npm run build
 
 Go to **WordPress Admin → Plugins** and activate "Laravel WP Framework"
 
-### Step 3: Access the Dashboard
+**Migrations run automatically on activation!** Your database tables are created using Laravel-style migrations.
+
+### Step 3: Start Using Eloquent
+
+```php
+use LaravelWP\Models\Item;
+
+// Create an item (Laravel-style)
+$item = Item::create([
+    'title' => 'My First Item',
+    'content' => 'This is amazing!',
+    'status' => 'active',
+]);
+
+// Query items (exactly like Laravel)
+$items = Item::where('status', 'active')
+    ->orderBy('created_at', 'desc')
+    ->get();
+```
+
+### Step 4: Access the Dashboard
 
 Visit **Dashboard → Laravel WP** to see your React-powered admin interface
 
-### Step 4: Use the Frontend Shortcode
+### Step 5: Use the Frontend Shortcode
 
 Add `[laravel_wp_app]` to any page to display the frontend React application
 
-**That's it!** 🎉 Your Laravel-style WordPress plugin is ready to use.
+**That's it!** 🎉 Your Laravel-style WordPress plugin with Eloquent ORM is ready to use.
 
 ---
 
 ## Features
 
-- 🏗️ **Laravel-Inspired Architecture**: Clean separation of concerns with Controllers, Services, Models, and Providers
-- ⚛️ **React-Powered**: Separate admin dashboard and frontend applications built with React
-- 🎨 **shadcn/ui-Inspired Design**: Clean black & white aesthetic using Tailwind CSS (no React conflicts!)
-- 🎯 **Lucide Icons**: Modern, beautiful icons from lucide-react
-- 🔌 **REST API**: Well-structured REST API endpoints for data operations
-- 📦 **PSR-4 Autoloading**: No runtime Composer dependencies required
-- 🚀 **WordPress.org Ready**: Built using @wordpress/scripts for perfect compatibility
-- 🔧 **PHP 8.3+**: Modern PHP features including typed properties and union types
-- 📱 **Responsive**: Mobile-first design approach
+### 💎 Laravel Eloquent ORM
+- **Full Eloquent ORM support** - Use `Item::where('status', 'active')->get()` instead of `$wpdb`
+- **Laravel-style migrations** - Database schema version control with `up()` and `down()` methods
+- **Eloquent relationships** - Define and use model relationships just like Laravel
+- **Query scopes** - Reusable query logic with local and global scopes
+- **Model events** - Hooks for creating, updating, deleting, etc.
+- **Automatic timestamps** - `created_at` and `updated_at` handled automatically
+- **Eloquent collections** - Powerful collection methods like `map()`, `filter()`, `pluck()`
+
+### 🏗️ Laravel-Inspired Architecture
+- **MVC Structure**: Clean separation with Controllers, Services, Models, and Providers
+- **Service Layer**: Business logic separated from controllers
+- **Dependency Injection**: Simple but effective DI pattern
+- **Configuration System**: Laravel-style config files with dot notation
+
+### ⚛️ Modern Frontend
+- **React-Powered**: Separate admin dashboard and frontend applications
+- **shadcn/ui-Inspired Design**: Clean black & white aesthetic using Tailwind CSS
+- **Lucide Icons**: Modern, beautiful icons from lucide-react
+- **WordPress Scripts**: Built using @wordpress/scripts for perfect compatibility
+- **Responsive**: Mobile-first design approach
+
+### 🔌 REST API & Integration
+- **Well-Structured REST API**: Endpoints following WordPress REST API standards
+- **Type-Safe Controllers**: PHP 8.3+ type hints throughout
+- **Automatic Sanitization**: Model mutators for data sanitization
+- **WordPress Integration**: Seamless integration with WordPress user system
+
+### 🚀 Developer Experience
+- **PSR-4 Autoloading**: Modern PHP autoloading standards
+- **Composer Support**: Laravel packages work out of the box
+- **Migration System**: Automatic database setup on plugin activation
+- **Comprehensive Documentation**: Laravel developer guide included
+- **PHP 8.3+**: Modern PHP features including union types and attributes
 
 ## Requirements
 
@@ -72,19 +124,125 @@ Add `[laravel_wp_app]` to any page to display the frontend React application
    cd laravel-wp-framework
    ```
 
-2. Install Node dependencies:
+2. Install Composer dependencies (Eloquent ORM):
+   ```bash
+   composer install
+   ```
+
+3. Install Node dependencies:
    ```bash
    npm install
    ```
 
-3. Build assets:
+4. Build assets:
    ```bash
    npm run build
    ```
 
-4. Activate the plugin in WordPress Admin
+5. Activate the plugin in WordPress Admin
+
+**Migrations will run automatically on activation!**
 
 ## 📖 How to Use
+
+### Using Eloquent ORM (For Laravel Developers)
+
+This framework includes **full Laravel Eloquent ORM support**! No more `$wpdb` queries.
+
+#### Basic Examples
+
+```php
+use LaravelWP\Models\Item;
+
+// Create
+$item = Item::create([
+    'title' => 'My Item',
+    'content' => 'Content here',
+    'status' => 'active',
+]);
+
+// Read
+$items = Item::all();
+$item = Item::find(1);
+$activeItems = Item::where('status', 'active')->get();
+
+// Update
+$item = Item::find(1);
+$item->title = 'Updated Title';
+$item->save();
+
+// Delete
+$item->delete();
+
+// Query Builder
+$items = Item::where('status', 'active')
+    ->where('user_id', get_current_user_id())
+    ->orderBy('created_at', 'desc')
+    ->limit(10)
+    ->get();
+
+// Scopes
+$items = Item::active()->recent(7)->get();
+
+// Aggregates
+$count = Item::where('status', 'active')->count();
+$maxId = Item::max('id');
+```
+
+#### Creating Your Own Models
+
+1. **Create a migration** in `database/migrations/`:
+
+```php
+<?php
+namespace LaravelWP\Database\Migrations;
+
+use LaravelWP\Database\Migration;
+use Illuminate\Database\Schema\Blueprint;
+
+class CreateProductsTable extends Migration
+{
+    public function up(): void
+    {
+        $this->create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->decimal('price', 10, 2);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        $this->dropIfExists('products');
+    }
+}
+```
+
+2. **Create a model** in `app/Models/`:
+
+```php
+<?php
+namespace LaravelWP\Models;
+
+use LaravelWP\Database\Model;
+
+class Product extends Model
+{
+    protected $table = 'products';
+    protected $fillable = ['name', 'price'];
+}
+```
+
+3. **Use it** anywhere:
+
+```php
+$product = Product::create(['name' => 'Book', 'price' => 29.99]);
+$products = Product::where('price', '<', 50)->get();
+```
+
+📚 **See comprehensive examples**: [ELOQUENT_EXAMPLES.md](ELOQUENT_EXAMPLES.md)
+📖 **Laravel Developer Guide**: [LARAVEL_GUIDE.md](LARAVEL_GUIDE.md)
 
 ### Admin Dashboard
 

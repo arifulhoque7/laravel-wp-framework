@@ -16,6 +16,7 @@ use LaravelWP\Controllers\Admin\AdminController;
 use LaravelWP\Controllers\Web\FrontendController;
 use LaravelWP\Controllers\Api\ApiController;
 use LaravelWP\Providers\AppServiceProvider;
+use LaravelWP\Database\DatabaseServiceProvider;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -37,6 +38,9 @@ class App
         // Load configuration
         static::loadConfig();
 
+        // Bootstrap Eloquent ORM
+        static::bootDatabase();
+
         // Register service provider
         $serviceProvider = new AppServiceProvider();
         $serviceProvider->register();
@@ -46,6 +50,19 @@ class App
 
         // Load text domain for translations
         add_action('init', [static::class, 'loadTextDomain']);
+    }
+
+    /**
+     * Bootstrap Eloquent ORM database connection
+     *
+     * Initializes Laravel's Eloquent ORM with WordPress database credentials.
+     * Must be called before any Eloquent models are used.
+     *
+     * @return void
+     */
+    private static function bootDatabase(): void
+    {
+        DatabaseServiceProvider::boot();
     }
 
     /**

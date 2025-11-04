@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace LaravelWP\Services;
 
-use LaravelWP\Models\ExampleModel;
+use LaravelWP\Models\Item;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -21,17 +21,19 @@ if (!defined('ABSPATH')) {
 
 /**
  * Example Service Class
+ *
+ * Now uses Eloquent ORM for database operations.
+ * Provides Laravel-familiar API for WordPress plugin development.
  */
 class ExampleService
 {
-    private ExampleModel $model;
-
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->model = new ExampleModel();
+        // No need to instantiate Eloquent models
+        // They use static methods and query builder
     }
 
     /**
@@ -59,28 +61,31 @@ class ExampleService
     }
 
     /**
-     * Get items from the model
+     * Get items from the model using Eloquent ORM
      *
-     * @return array
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getItems(): array
+    public function getItems()
     {
-        return $this->model->getAll();
+        // Using Eloquent ORM - Laravel-style query
+        return Item::active()
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**
-     * Create a new item
+     * Create a new item using Eloquent ORM
      *
      * @param string $title Item title
      * @param string $content Item content
-     * @return array Created item data
+     * @return Item Created item model
      * @throws \Exception If creation fails
      */
-    public function createItem(string $title, string $content = ''): array
+    public function createItem(string $title, string $content = ''): Item
     {
         // Validate title
         $title = trim($title);
-        
+
         if (empty($title)) {
             throw new \Exception(
                 esc_html__('Title is required', 'laravel-wp-framework')
@@ -93,24 +98,21 @@ class ExampleService
             );
         }
 
-        // Sanitize and prepare data
-        $itemData = [
-            'title' => sanitize_text_field($title),
-            'content' => sanitize_textarea_field($content),
-            'created_at' => current_time('mysql'),
+        // Create using Eloquent - automatic sanitization via mutators
+        // Timestamps and user_id are set automatically
+        $item = Item::create([
+            'title' => $title,
+            'content' => $content,
             'status' => 'active',
-        ];
+        ]);
 
-        // Create the item
-        $created = $this->model->create($itemData);
-
-        if (!$created) {
+        if (!$item) {
             throw new \Exception(
                 esc_html__('Failed to create item', 'laravel-wp-framework')
             );
         }
 
-        return $created;
+        return $item;
     }
 }
 

@@ -18,7 +18,20 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Load Composer autoloader if available
+ *
+ * This loads Illuminate/Database (Eloquent ORM) and other dependencies.
+ */
+$composer_autoload = LARAVEL_WP_PATH . 'vendor/autoload.php';
+if (file_exists($composer_autoload)) {
+    require_once $composer_autoload;
+}
+
+/**
  * PSR-4 Autoloader Implementation
+ *
+ * Handles loading plugin classes from the app directory.
+ * Works in conjunction with Composer autoloader.
  */
 spl_autoload_register(function (string $class): void {
     // Project-specific namespace prefix

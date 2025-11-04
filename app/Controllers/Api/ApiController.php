@@ -88,6 +88,44 @@ class ApiController
                 ],
             ],
         ]);
+
+        // PUT /laravel-wp/v1/items/{id}
+        register_rest_route($namespace, '/items/(?P<id>\d+)', [
+            'methods' => 'PUT',
+            'callback' => [$this, 'updateItem'],
+            'permission_callback' => [$this, 'checkPermission'],
+            'args' => [
+                'id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+                'title' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'content' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                ],
+            ],
+        ]);
+
+        // DELETE /laravel-wp/v1/items/{id}
+        register_rest_route($namespace, '/items/(?P<id>\d+)', [
+            'methods' => 'DELETE',
+            'callback' => [$this, 'deleteItem'],
+            'permission_callback' => [$this, 'checkPermission'],
+            'args' => [
+                'id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -162,6 +200,89 @@ class ApiController
         } catch (\Exception $e) {
             return new WP_Error(
                 'item_create_error',
+                $e->getMessage(),
+                ['status' => 500]
+            );
+        }
+    }
+
+    /**
+     * Update item endpoint
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error
+     */
+    public function updateItem(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $id = $request->get_param('id');
+            $title = $request->get_param('title');
+            $content = $request->get_param('content');
+
+            $item = \LaravelWP\Models\Item::find($id);
+
+            if (!$item) {
+                return new WP_Error(
+                    'item_not_found',
+                    __('Item not found', 'laravel-wp-framework'),
+                    ['status' => 404]
+                );
+            }
+
+            // Update only provided fields
+            if ($title !== null) {
+                $item->title = $title;
+            }
+            if ($content !== null) {
+                $item->content = $content;
+            }
+
+            $item->save();
+
+            return new WP_REST_Response([
+                'success' => true,
+                'item' => $item,
+                'message' => __('Item updated successfully', 'laravel-wp-framework'),
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'item_update_error',
+                $e->getMessage(),
+                ['status' => 500]
+            );
+        }
+    }
+
+    /**
+     * Delete item endpoint
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error
+     */
+    public function deleteItem(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $id = $request->get_param('id');
+
+            $item = \LaravelWP\Models\Item::find($id);
+
+            if (!$item) {
+                return new WP_Error(
+                    'item_not_found',
+                    __('Item not found', 'laravel-wp-framework'),
+                    ['status' => 404]
+                );
+            }
+
+            $item->delete();
+
+            return new WP_REST_Response([
+                'success' => true,
+                'message' => __('Item deleted successfully', 'laravel-wp-framework'),
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_Error(
+                'item_delete_error',
                 $e->getMessage(),
                 ['status' => 500]
             );

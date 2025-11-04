@@ -53,6 +53,16 @@ if (class_exists('LaravelWP\App')) {
 
 // Activation hook
 register_activation_hook(__FILE__, function () {
+    // Run database migrations
+    if (class_exists('LaravelWP\\Database\\Migrator')) {
+        try {
+            $migrator = new \LaravelWP\Database\Migrator();
+            $migrator->run();
+        } catch (\Exception $e) {
+            error_log('Laravel WP Framework: Migration failed - ' . $e->getMessage());
+        }
+    }
+
     // Flush rewrite rules on activation
     flush_rewrite_rules();
 });
@@ -61,5 +71,8 @@ register_activation_hook(__FILE__, function () {
 register_deactivation_hook(__FILE__, function () {
     // Flush rewrite rules on deactivation
     flush_rewrite_rules();
+
+    // Note: We don't rollback migrations on deactivation
+    // to preserve user data. Use a custom uninstall.php if needed.
 });
 

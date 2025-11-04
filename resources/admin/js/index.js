@@ -9,10 +9,10 @@
 import { createElement } from '@wordpress/element';
 import { createRoot, useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { 
+import {
     Zap, RefreshCw, LayoutDashboard, FileText, Settings,
     TrendingUp, Users, BookOpen, Package,
-    CheckCircle2, Loader2, AlertCircle
+    CheckCircle2, Loader2, AlertCircle, Pencil, Trash2, X, AlertTriangle
 } from 'lucide-react';
 import './style.scss';
 
@@ -34,6 +34,74 @@ const { div, h1, h2, h3, h4, p, span, button, a, form, label, input, textarea, c
 };
 
 /**
+ * DeleteModal Component
+ */
+function DeleteModal({ isOpen, onClose, onConfirm, itemTitle, isDeleting }) {
+    if (!isOpen) return null;
+
+    return div(
+        { className: 'fixed inset-0 z-50 flex items-center justify-center' },
+        // Backdrop
+        div({
+            className: 'fixed inset-0 bg-black/50 backdrop-blur-sm',
+            onClick: isDeleting ? null : onClose
+        }),
+        // Modal
+        div(
+            { className: 'relative bg-background rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 z-10' },
+            // Close button
+            button(
+                {
+                    onClick: onClose,
+                    disabled: isDeleting,
+                    className: 'absolute top-4 right-4 p-1 rounded-lg hover:bg-muted transition-colors disabled:opacity-50',
+                    'aria-label': 'Close'
+                },
+                createElement(X, { className: 'w-5 h-5' })
+            ),
+            // Icon
+            div(
+                { className: 'flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-destructive/10' },
+                createElement(AlertTriangle, { className: 'w-6 h-6 text-destructive' })
+            ),
+            // Title
+            h3(
+                { className: 'text-xl font-bold text-foreground text-center mb-2' },
+                'Delete Item?'
+            ),
+            // Message
+            p(
+                { className: 'text-muted-foreground text-center mb-6' },
+                'Are you sure you want to delete ',
+                span({ className: 'font-semibold text-foreground' }, `"${itemTitle}"`),
+                '? This action cannot be undone.'
+            ),
+            // Actions
+            div(
+                { className: 'flex gap-3' },
+                button(
+                    {
+                        onClick: onClose,
+                        disabled: isDeleting,
+                        className: 'flex-1 px-4 py-2.5 border border-input rounded-lg font-semibold hover:bg-muted transition-colors disabled:opacity-50'
+                    },
+                    'Cancel'
+                ),
+                button(
+                    {
+                        onClick: onConfirm,
+                        disabled: isDeleting,
+                        className: 'flex-1 px-4 py-2.5 bg-destructive text-destructive-foreground rounded-lg font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2'
+                    },
+                    isDeleting && createElement(Loader2, { className: 'w-4 h-4 animate-spin' }),
+                    isDeleting ? 'Deleting...' : 'Delete'
+                )
+            )
+        )
+    );
+}
+
+/**
  * Admin Dashboard Component
  */
 function AdminApp() {
@@ -47,6 +115,13 @@ function AdminApp() {
     const [activeTab, setActiveTab] = useState('overview');
     const [showNotification, setShowNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
+    const [editingItem, setEditingItem] = useState(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editContent, setEditContent] = useState('');
+    const [updating, setUpdating] = useState(false);
+    const [deleting, setDeleting] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     // Fetch initial data
     useEffect(() => {
@@ -84,7 +159,7 @@ function AdminApp() {
 
     const handleCreateItem = async (e) => {
         e.preventDefault();
-        
+
         if (!newItemTitle.trim()) {
             alert('Please enter a title');
             return;
@@ -100,7 +175,7 @@ function AdminApp() {
                     content: newItemContent,
                 },
             });
-            
+
             setNewItemTitle('');
             setNewItemContent('');
             fetchItems();
@@ -110,6 +185,82 @@ function AdminApp() {
         } finally {
             setCreating(false);
         }
+    };
+
+    const handleEditItem = (item) => {
+        setEditingItem(item);
+        setEditTitle(item.title);
+        setEditContent(item.content || '');
+    };
+
+    const handleUpdateItem = async (e) => {
+        e.preventDefault();
+
+        if (!editTitle.trim()) {
+            alert('Please enter a title');
+            return;
+        }
+
+        try {
+            setUpdating(true);
+            await apiFetch({
+                path: `/laravel-wp/v1/items/${editingItem.id}`,
+                method: 'PUT',
+                data: {
+                    title: editTitle,
+                    content: editContent,
+                },
+            });
+
+            setEditingItem(null);
+            setEditTitle('');
+            setEditContent('');
+            fetchItems();
+            showSuccessNotification('Item updated successfully!');
+        } catch (err) {
+            alert('Failed to update item: ' + err.message);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleDeleteClick = (item) => {
+        setItemToDelete(item);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!itemToDelete) return;
+
+        try {
+            setDeleting(itemToDelete.id);
+            await apiFetch({
+                path: `/laravel-wp/v1/items/${itemToDelete.id}`,
+                method: 'DELETE',
+            });
+
+            setShowDeleteModal(false);
+            setItemToDelete(null);
+            fetchItems();
+            showSuccessNotification('Item deleted successfully!');
+        } catch (err) {
+            alert('Failed to delete item: ' + err.message);
+        } finally {
+            setDeleting(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        if (!deleting) {
+            setShowDeleteModal(false);
+            setItemToDelete(null);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingItem(null);
+        setEditTitle('');
+        setEditContent('');
     };
 
     if (loading) {
@@ -142,9 +293,18 @@ function AdminApp() {
 
     return div(
         { className: 'lwpf-root bg-background min-h-screen' },
-        // Success Notification
+        // Delete Confirmation Modal
+        createElement(DeleteModal, {
+            isOpen: showDeleteModal,
+            onClose: handleDeleteCancel,
+            onConfirm: handleDeleteConfirm,
+            itemTitle: itemToDelete?.title || '',
+            isDeleting: deleting !== null
+        }),
+
+        // Success Notification (Bottom Right)
         showNotification && div(
-            { className: 'fixed top-8 right-8 bg-foreground text-background px-6 py-4 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-down' },
+            { className: 'fixed bottom-8 right-8 bg-foreground text-background px-6 py-4 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-up' },
             createElement(CheckCircle2, { className: 'w-6 h-6' }),
             span({ className: 'font-medium' }, notificationMessage)
         ),
@@ -295,8 +455,65 @@ function AdminApp() {
 
             activeTab === 'items' && div(
                 null,
+                // Edit Item Card (shown when editing)
+                editingItem && div(
+                    { className: 'rounded-xl border-2 border-foreground bg-card text-card-foreground shadow-xl mb-8' },
+                    div(
+                        { className: 'p-6 border-b' },
+                        h3({ className: 'text-xl font-semibold text-foreground' }, 'Edit Item')
+                    ),
+                    div(
+                        { className: 'p-6' },
+                        form(
+                            { onSubmit: handleUpdateItem, className: 'space-y-6' },
+                            div(
+                                null,
+                                label({ className: 'block text-sm font-semibold text-foreground mb-2' }, 'Title'),
+                                input({
+                                    type: 'text',
+                                    value: editTitle,
+                                    onChange: (e) => setEditTitle(e.target.value),
+                                    placeholder: 'Enter item title...',
+                                    className: 'w-full px-4 py-3 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all'
+                                })
+                            ),
+                            div(
+                                null,
+                                label({ className: 'block text-sm font-semibold text-foreground mb-2' }, 'Content'),
+                                textarea({
+                                    value: editContent,
+                                    onChange: (e) => setEditContent(e.target.value),
+                                    placeholder: 'Enter item content...',
+                                    rows: 4,
+                                    className: 'w-full px-4 py-3 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all resize-none'
+                                })
+                            ),
+                            div(
+                                { className: 'flex gap-3' },
+                                button(
+                                    {
+                                        type: 'submit',
+                                        disabled: updating,
+                                        className: 'inline-flex items-center justify-center gap-2 px-6 py-3 bg-foreground text-background rounded-lg font-semibold shadow-md hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all'
+                                    },
+                                    updating && createElement(Loader2, { className: 'w-4 h-4 animate-spin' }),
+                                    updating ? 'Updating...' : 'Update Item'
+                                ),
+                                button(
+                                    {
+                                        type: 'button',
+                                        onClick: handleCancelEdit,
+                                        className: 'inline-flex items-center justify-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-all'
+                                    },
+                                    'Cancel'
+                                )
+                            )
+                        )
+                    )
+                ),
+
                 // Create New Item Card
-                div(
+                !editingItem && div(
                     { className: 'rounded-xl border bg-card text-card-foreground shadow hover:shadow-lg transition-shadow mb-8' },
                     div(
                         { className: 'p-6 border-b' },
@@ -360,7 +577,7 @@ function AdminApp() {
                             { className: 'space-y-3' },
                             items.map((item, i) =>
                                 div(
-                                    { key: i, className: 'flex items-start gap-4 p-5 rounded-lg border border-border hover:border-foreground hover:bg-accent transition-all' },
+                                    { key: item.id || i, className: 'flex items-start gap-4 p-5 rounded-lg border border-border hover:border-foreground hover:bg-accent transition-all' },
                                     div(
                                         { className: 'flex-shrink-0 w-12 h-12 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg shadow' },
                                         i + 1
@@ -370,7 +587,27 @@ function AdminApp() {
                                         h4({ className: 'font-semibold text-lg text-foreground mb-1' }, item.title),
                                         item.content && p({ className: 'text-sm text-muted-foreground line-clamp-2' }, item.content)
                                     ),
-                                    createElement(CheckCircle2, { className: 'flex-shrink-0 w-6 h-6 text-foreground mt-1' })
+                                    div(
+                                        { className: 'flex items-center gap-2' },
+                                        button(
+                                            {
+                                                onClick: () => handleEditItem(item),
+                                                disabled: deleting === item.id,
+                                                className: 'p-2 rounded-lg bg-muted hover:bg-foreground hover:text-background transition-all disabled:opacity-50',
+                                                title: 'Edit item'
+                                            },
+                                            createElement(Pencil, { className: 'w-5 h-5' })
+                                        ),
+                                        button(
+                                            {
+                                                onClick: () => handleDeleteClick(item),
+                                                disabled: deleting === item.id,
+                                                className: 'p-2 rounded-lg bg-muted hover:bg-destructive hover:text-destructive-foreground transition-all disabled:opacity-50',
+                                                title: 'Delete item'
+                                            },
+                                            createElement(Trash2, { className: 'w-5 h-5' })
+                                        )
+                                    )
                                 )
                             )
                         )
