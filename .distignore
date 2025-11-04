@@ -1,0 +1,55 @@
+# Development files
+/node_modules
+/resources
+/.git
+/.github
+/.vscode
+/.idea
+
+# Configuration files
+.gitignore
+.distignore
+.editorconfig
+.eslintrc.js
+.prettierrc
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml
+phpunit.xml
+webpack.config.js
+
+# Documentation
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Tests
+/tests
+/phpunit
+/.phpunit.result.cache
+
+# Build scripts
+/bin
+/scripts
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Source maps
+*.map
+
+# Environment
+.env
+.env.*
+

@@ -1,0 +1,29 @@
+/**
+ * Frontend App Styles with Tailwind CSS
+ * Scoped to prevent conflicts with theme styles
+ *
+ * @package LaravelWP
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root wrapper for scoped Tailwind styles */
+.lwpf-root {
+  /* Ensure proper text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  /* Override theme defaults if needed */
+  line-height: 1.5;
+  
+  /* Ensure all child elements use border-box */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+

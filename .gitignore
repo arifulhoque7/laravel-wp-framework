@@ -1,0 +1,53 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Composer
+/vendor/
+
+# Build artifacts - Keep committed for WordPress.org distribution
+# Uncomment below to exclude builds from git:
+# /build/
+
+# WordPress
+wp-config.php
+.htaccess
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Package manager lock files (optional)
+# package-lock.json
+# yarn.lock
+# composer.lock
+
+# Test coverage
+coverage/
+.phpunit.result.cache
+
+# Distribution
+dist/
+*.zip
+

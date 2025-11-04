@@ -1,0 +1,44 @@
+/**
+ * Admin Dashboard Styles with Tailwind CSS
+ * Scoped to prevent conflicts with other plugins
+ *
+ * @package LaravelWP
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Override WordPress admin default spacing for our plugin page */
+.toplevel_page_laravel-wp-dashboard {
+  #wpcontent {
+    padding-left: 0 !important;
+  }
+  
+  #wpbody-content {
+    padding-bottom: 0 !important;
+  }
+  
+  .wrap {
+    margin: 0 !important;
+  }
+}
+
+/* Root wrapper for scoped Tailwind styles */
+.lwpf-root {
+  /* Ensure proper text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  /* Override WordPress admin defaults */
+  line-height: 1.5;
+  
+  /* Ensure all child elements use border-box */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
