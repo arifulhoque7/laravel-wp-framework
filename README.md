@@ -2,6 +2,39 @@
 
 A professional, Laravel-inspired WordPress plugin architecture with separated admin and frontend React applications, modern PHP 8.3+ practices, and clean MVC structure.
 
+![WordPress Plugin Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-777BB4.svg)
+![WordPress Version](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)
+![License](https://img.shields.io/badge/license-GPL--2.0-green.svg)
+
+## 🚀 Quick Start
+
+### Step 1: Install the Plugin
+
+```bash
+cd wp-content/plugins
+git clone https://github.com/arifulhoque7/laravel-wp-framework.git
+cd laravel-wp-framework
+npm install
+npm run build
+```
+
+### Step 2: Activate in WordPress
+
+Go to **WordPress Admin → Plugins** and activate "Laravel WP Framework"
+
+### Step 3: Access the Dashboard
+
+Visit **Dashboard → Laravel WP** to see your React-powered admin interface
+
+### Step 4: Use the Frontend Shortcode
+
+Add `[laravel_wp_app]` to any page to display the frontend React application
+
+**That's it!** 🎉 Your Laravel-style WordPress plugin is ready to use.
+
+---
+
 ## Features
 
 - 🏗️ **Laravel-Inspired Architecture**: Clean separation of concerns with Controllers, Services, Models, and Providers
@@ -35,7 +68,7 @@ A professional, Laravel-inspired WordPress plugin architecture with separated ad
 1. Clone this repository into your `wp-content/plugins` directory:
    ```bash
    cd wp-content/plugins
-   git clone https://github.com/yourusername/laravel-wp-framework.git
+   git clone https://github.com/arifulhoque7/laravel-wp-framework.git
    cd laravel-wp-framework
    ```
 
@@ -51,7 +84,7 @@ A professional, Laravel-inspired WordPress plugin architecture with separated ad
 
 4. Activate the plugin in WordPress Admin
 
-## Usage
+## 📖 How to Use
 
 ### Admin Dashboard
 
@@ -109,6 +142,73 @@ Creates a new item (requires authentication).
   "title": "Item Title",
   "content": "Item content"
 }
+```
+
+### Practical Examples
+
+#### Example 1: Display Frontend App on Homepage
+
+Edit your homepage or create a new page, then add:
+
+```
+[laravel_wp_app]
+```
+
+Save and view the page to see the React app in action!
+
+#### Example 2: Create Items via API
+
+Using JavaScript:
+
+```javascript
+// Get WordPress REST API nonce
+const nonce = document.querySelector('#wp-rest-nonce')?.value;
+
+// Create a new item
+fetch('/wp-json/laravel-wp/v1/items', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-WP-Nonce': nonce
+  },
+  body: JSON.stringify({
+    title: 'My New Item',
+    content: 'This is the content of my new item'
+  })
+})
+.then(response => response.json())
+.then(data => console.log('Success:', data))
+.catch(error => console.error('Error:', error));
+```
+
+#### Example 3: Customize the Admin Dashboard
+
+1. Navigate to `resources/admin/js/index.js`
+2. Modify the `AdminApp` component
+3. Run `npm run build:admin` to rebuild
+4. Refresh your WordPress admin dashboard
+
+#### Example 4: Add Custom Service
+
+Create a new service in `app/Services/`:
+
+```php
+<?php
+namespace LaravelWP\Services;
+
+class MyCustomService {
+    public function processData(array $data): array {
+        // Your business logic here
+        return $data;
+    }
+}
+```
+
+Then use it in your controller:
+
+```php
+$myService = new MyCustomService();
+$result = $myService->processData($data);
 ```
 
 ## Development
