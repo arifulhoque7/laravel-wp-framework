@@ -1,0 +1,82 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.php text eol=lf diff=php
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.html text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Config files
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Build files
+*.map text eol=lf
+package.json text eol=lf
+package-lock.json text eol=lf
+composer.json text eol=lf
+composer.lock text eol=lf
+
+# Documentation
+LICENSE text eol=lf
+README text eol=lf
+CHANGELOG text eol=lf
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+
+# Videos
+*.mp4 binary
+*.mov binary
+*.avi binary
+
+# Audio
+*.mp3 binary
+*.wav binary
+
+# Export ignore (for distribution)
+.gitattributes export-ignore
+.gitignore export-ignore
+.editorconfig export-ignore
+.github/ export-ignore
+node_modules/ export-ignore
+tests/ export-ignore
+.phpunit.result.cache export-ignore
+phpunit.xml export-ignore
+*.map export-ignore
+
